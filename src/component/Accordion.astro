@@ -1,0 +1,214 @@
+---
+import slugify from "slugify";
+
+import { Icon } from "astro-icon";
+
+import type { CollectionEntry } from "astro:content";
+
+type Props = {
+  accordionItems: CollectionEntry<"faqs">["data"][];
+  title: string;
+  isFirstExpanded?: boolean;
+  isOnlyOneExpandable?: boolean;
+};
+
+const { accordionItems, title, isFirstExpanded, isOnlyOneExpandable } =
+  Astro.props;
+---
+
+<section
+  aria-labelledby={slugify(title)}
+  data-isFirstExpanded={isFirstExpanded}
+  data-isOnlyOneExpandable={isOnlyOneExpandable}
+  class="acc"
+>
+  <div class="title">
+    <Icon name="icon-star" alt="stars" width="24" />
+    <h2 id={slugify(title)}>{title}</h2>
+  </div>
+  {
+    accordionItems.map((i, index) => (
+      <div class="item">
+        <button
+          id={`question-${slugify(title)}-${index}`}
+          aria-controls={`answer-${slugify(title)}-${index}`}
+          aria-expanded="false"
+          class="acc-question"
+        >
+          <span>{i.question}</span>
+          <Icon name="icon-plus" width="32" class="aria-expanded-hide" />
+          <Icon name="icon-minus" width="32" class="aria-expanded-show" />
+        </button>
+        <div
+          aria-labelledby={`question-${slugify(title)}-${index}`}
+          id={`answer-${slugify(title)}-${index}`}
+          class="acc-answer"
+        >
+          {i.answer}
+        </div>
+      </div>
+    ))
+  }
+</section>
+
+<style>
+  section {
+    display: grid;
+    gap: var(--space-xl);
+    margin-inline: var(--space-xxl);
+    padding: var(--space-xxl);
+    background-color: var(--bkg);
+    border-radius: var(--rounded);
+    width: 650px;
+    max-width: 100%;
+  }
+  .title {
+    display: flex;
+    gap: var(--space-xl);
+    font-size: var(--fs-lg);
+  }
+  .item {
+    border-bottom: 2px solid var(--muted);
+    display: grid;
+    gap: var(--space-xl);
+    padding-block-end: var(--space-xl);
+  }
+  .item:last-of-type {
+    border: none;
+  }
+  .acc-question {
+    font-weight: 600;
+    color: var(--text);
+    text-wrap: balance;
+    /* font-size: var(--fs-md); */
+    text-align: left;
+    background-color: transparent;
+    border: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    justify-content: space-between;
+    line-height: 1.1;
+    border-radius: 6px;
+    transition: box-shadow 100ms cubic-bezier(0.165, 0.84, 0.44, 1);
+
+    &:hover,
+    &:focus {
+      color: var(--accent);
+      outline: 2px solid transparent;
+    }
+
+    &:focus-visible {
+      box-shadow:
+        0 0 0 4px var(--bkg),
+        0 0 0 6px var(--accent);
+    }
+  }
+  .acc-answer {
+    display: none;
+    text-wrap: balance;
+  }
+
+  .acc-question[aria-expanded="true"] + .acc-answer {
+    display: block;
+  }
+</style>
+
+<script>
+  const accordions = [...document.querySelectorAll(".acc")] as HTMLDivElement[];
+
+  const setAriaExpandedFalse = (btn: HTMLButtonElement) => {
+    btn.setAttribute("aria-expanded", "false");
+  };
+
+  const isAriaExpanded = (btn: HTMLButtonElement) =>
+    JSON.parse(btn.getAttribute("aria-expanded") as string) as boolean;
+
+  const toggleAriaExpanded = (btn: HTMLButtonElement) => {
+    const isExpanded = isAriaExpanded(btn);
+    btn.setAttribute("aria-expanded", `${!isExpanded}`);
+  };
+
+  accordions.forEach((acc) => {
+    // data for accordion
+    const isFirstExpanded = acc.hasAttribute("data-isFirstExpanded");
+    const isOnlyOneExpandable = acc.hasAttribute("data-isOnlyOneExpandable");
+
+    // show first expanded if data-isFirstExpanded is present
+    if (isFirstExpanded) {
+      const firstBtn = acc.querySelector(".acc-question") as HTMLButtonElement;
+      toggleAriaExpanded(firstBtn);
+    }
+
+    const accBtns = [
+      ...acc.querySelectorAll(".acc-question"),
+    ] as HTMLButtonElement[];
+
+    // set event listeners
+    accBtns.forEach((btn) =>
+      btn.addEventListener("click", (e) => {
+        // is the current button open?
+        const isExpanded = isAriaExpanded(btn);
+
+        // check if all others should close?
+        if (isOnlyOneExpandable) {
+          accBtns.forEach(setAriaExpandedFalse);
+        }
+
+        if (isOnlyOneExpandable && isExpanded) {
+        } else {
+          toggleAriaExpanded(btn);
+        }
+
+        // expand if it was previously closed
+      })
+    );
+    acc.addEventListener("keydown", (e) => {
+      // is this a button?
+      //@ts-expect-error
+      const isBtn = [...e.target.classList].includes("acc-question");
+
+      if (!isBtn) {
+        return;
+      }
+
+      const currentButtonIndex = accBtns.indexOf(e.target as HTMLButtonElement);
+
+      // only prevent default if these four buttons are pressed
+      if (
+        e.key === "ArrowDown" ||
+        e.key === "ArrowUp" ||
+        e.key === "End" ||
+        e.key === "Home"
+      ) {
+        e.preventDefault();
+      }
+
+      // handle four keypress options for acc
+      switch (e.key) {
+        case "ArrowDown":
+          if (accBtns.length - 1 === currentButtonIndex) {
+            accBtns[0].focus();
+          } else {
+            accBtns[currentButtonIndex + 1].focus();
+          }
+          break;
+        case "ArrowUp":
+          if (currentButtonIndex === 0) {
+            accBtns[accBtns.length - 1].focus();
+          } else {
+            accBtns[currentButtonIndex - 1].focus();
+          }
+          break;
+        case "End":
+          accBtns[accBtns.length - 1].focus();
+          break;
+        case "Home":
+          accBtns[0].focus();
+          break;
+        default:
+          break;
+      }
+    });
+  });
+</script>

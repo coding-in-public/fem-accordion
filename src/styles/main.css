@@ -1,0 +1,107 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+svg {
+  pointer-events: none;
+}
+
+@font-face {
+  font-family: "Work Sans";
+  src: local("Work Sans Regular") url("/fonts/WorkSans-Regular.ttf")
+    format("truetype");
+  font-style: normal;
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Work Sans";
+  src: local("Work Sans SemiBold") url("/fonts/WorkSans-Semibold.ttf")
+    format("truetype");
+  font-style: normal;
+  font-weight: 600;
+}
+@font-face {
+  font-family: "Work Sans";
+  src: local("Work Sans Bold") url("/fonts/WorkSans-Bold.ttf")
+    format("truetype");
+  font-style: normal;
+  font-weight: 700;
+}
+
+:root {
+  /* colors */
+  --bkg: hsl(0, 0%, 100%);
+  --muted: hsl(275, 100%, 97%);
+  --text-muted: hsl(292, 16%, 49%);
+  --text: hsl(292, 42%, 14%);
+  --accent: hsl(281, 83%, 54%);
+
+  /* fonts */
+  --fs-sm: 1rem;
+  --fs-md: 1.25rem;
+  --fs-lg: 1.5rem;
+
+  /* spacing */
+  --space-xs: 2px;
+  --space-sm: 4px;
+  --space-md: 6px;
+  --space-lg: 10px;
+  --space-xl: 16px;
+  --space-xxl: 24px;
+
+  /* radius */
+  --rounded: 0.75rem;
+}
+
+body {
+  font-family: "Work Sans", sans-serif;
+  font-weight: 400;
+  background-color: var(--muted);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+[aria-expanded="false"] > .aria-expanded-show {
+  display: none;
+}
+
+[aria-expanded="true"] > .aria-expanded-show {
+  display: block;
+}
+
+[aria-expanded="true"] > .aria-expanded-hide {
+  display: none;
+}
+
+.only-desktop {
+  display: none;
+}
+.absolute-top {
+  position: absolute;
+  top: 0;
+  z-index: -1;
+  left: 0;
+  right: 0;
+}
+
+@media (min-width: 600px) {
+  .only-mobile {
+    display: none;
+  }
+  .only-desktop {
+    display: block;
+  }
+}
