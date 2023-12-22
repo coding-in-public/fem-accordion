@@ -1,4 +1,1 @@
-## Left to do
-
-1. add css for stuff
-2. add fonts
+Stream here: https://youtube.com/live/Zxw_g7VKkc4?feature=share
